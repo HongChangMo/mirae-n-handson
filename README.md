@@ -60,11 +60,11 @@ docker compose --profile php logs
 # 현행 샘플
 cd modern/api && ./gradlew test                  # DB 없이 통과해야 함 (Day 0 준비 9)
 cd modern/api && ./gradlew bootRun               # "Tomcat started on port 8080", modern 프로필 DB 필요
-cd modern/web && npm install && npm run dev
+cd modern/web && npm ci && npm run dev
 cd modern/web && npm run lint && npm run typecheck && npm test
 
 # 동작 보존 테스트
-cd characterization && npm install
+cd characterization && npm ci
 cd characterization && npm run baseline -- <모듈명>          # item-bank | assignment | grade
 cd characterization && npm test                               # 대상: 레거시(기본 포트)
 cd characterization && TARGET_BASE_URL=http://localhost:8080 npm test   # 대상: 새 API

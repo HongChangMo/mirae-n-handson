@@ -283,7 +283,7 @@ fi
 [ "$SECTION_FAIL" = "1" ] && hint "Day 0 준비 3 · 준비 9"
 
 # ──────────────────────────────────────────────────────────────────────────
-section 6 "테스트 1회 실행 — modern/api ./gradlew test, characterization npm install"
+section 6 "테스트 1회 실행 — modern/api ./gradlew test, characterization npm ci"
 # ──────────────────────────────────────────────────────────────────────────
 SECTION_FAIL=0
 if [ ! -d "$REPO_ROOT/modern/api" ] || [ ! -f "$REPO_ROOT/modern/api/gradlew" ]; then
@@ -310,17 +310,17 @@ elif ! has npm; then
 else
   NPM_OK=1
   if [ ! -d "$REPO_ROOT/characterization/node_modules" ]; then
-    printf '     실행 중: (cd characterization && npm install)\n'
-    NPM_OUT="$(cd "$REPO_ROOT/characterization" && npm install --silent --no-audit --no-fund 2>&1)"
+    printf '     실행 중: (cd characterization && npm ci)\n'
+    NPM_OUT="$(cd "$REPO_ROOT/characterization" && npm ci --silent --no-audit --no-fund 2>&1)"
     NPM_RC=$?
     if [ $NPM_RC -eq 0 ]; then
-      pass "characterization npm install"
+      pass "characterization npm ci"
     else
       printf '%s\n' "$NPM_OUT" | tail -5 | sed 's/^/     /'
-      fail "characterization npm install 실패 (종료 코드 $NPM_RC)"; SECTION_FAIL=1; NPM_OK=0
+      fail "characterization npm ci 실패 (종료 코드 $NPM_RC)"; SECTION_FAIL=1; NPM_OK=0
     fi
   else
-    pass "characterization node_modules 있음 (npm install 완료)"
+    pass "characterization node_modules 있음 (의존성 설치 완료)"
   fi
   if [ "$NPM_OK" = "1" ] && [ -f "$REPO_ROOT/characterization/tests/normalize.unit.test.js" ]; then
     UNIT_OUT="$(cd "$REPO_ROOT/characterization" && npx vitest run tests/normalize.unit.test.js 2>&1)"

@@ -16,7 +16,7 @@ Day 2-3 실습 3 · 4에서 쓰는 TypeScript MCP 서버 골격입니다. stdio�
 ## 빌드 · 실행
 
 ```bash
-npm install
+npm ci
 npx tsc
 ls build        # index.js 가 보이면 성공
 ```
