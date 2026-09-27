@@ -93,7 +93,7 @@ mirae-n-handson/
 ├── incident-logs/             장애 로그 시나리오 a~d (2-2, 4-1)
 ├── mcp-skeleton/              TypeScript MCP 서버 골격 (2-3)
 ├── pipeline-samples/          배치 로그 · 적재 건수 CSV · Terraform 예시 (3-2, 3-5, 4-1)
-├── ci-ports/                  GitLab CI · Jenkins 이식용 예시 (3-1)
+├── ci-ports/                  GitLab CI(.gitlab-ci.yml, 숨김 파일) · Jenkins 이식용 예시 (3-1)
 ├── specs/                     신규 개발 스펙 + 시작 골격 java / python (4-2)
 └── templates/                 프로젝트 유형별 CLAUDE.md 템플릿 · 검증루프 · 승인 체크리스트 · 시큐어코딩 체크리스트 (1-1, 2-1, 3-4)
 ```
