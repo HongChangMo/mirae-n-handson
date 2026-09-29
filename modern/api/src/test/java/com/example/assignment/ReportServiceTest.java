@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 import com.example.common.NotFoundException;
-import com.example.item.Unit;
+import com.example.domain.item.Unit;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;

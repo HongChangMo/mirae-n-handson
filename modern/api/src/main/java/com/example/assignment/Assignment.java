@@ -1,6 +1,6 @@
 package com.example.assignment;
 
-import com.example.item.Unit;
+import com.example.domain.item.Unit;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
