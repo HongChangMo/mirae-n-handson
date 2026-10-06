@@ -2,8 +2,8 @@ package com.example;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.example.application.item.ItemService;
-import com.example.interfaces.item.ItemController;
+import com.example.item.ItemController;
+import com.example.item.ItemService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
