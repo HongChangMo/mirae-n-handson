@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 cd modern/api && ./gradlew test                                  # H2(test 프로필), DB 컨테이너 없이 통과
-cd modern/api && ./gradlew test --tests 'com.example.item.ItemServiceTest'
+cd modern/api && ./gradlew test --tests 'com.example.application.item.ItemServiceTest'
 cd modern/api && ./gradlew build                                 # 테스트 포함 전체 빌드
 
 cd modern/web && npm ci                                          # package-lock.json 을 바꾸지 않는 설치
@@ -42,14 +42,15 @@ com/example/
 | `interfaces` | `@RestController`, 요청 · 응답 record DTO | `application` |
 | `application` | 유스케이스 서비스, `@Transactional` | `domain` |
 | `domain` | 엔티티, 도메인 예외, 리포지토리 **인터페이스** | 없음 (다른 세 계층을 import 하지 않는다) |
-| `infrastructure` | 리포지토리 구현체, Spring Data `*JpaRepository`, 외부 연동 클라이언트 | `domain` |
+| `infrastructure` | 리포지토리 구현체 `*RepositoryImpl`, Spring Data `*JpaRepository`, 외부 연동 클라이언트 | `domain` |
 
 - DIP: `application` 은 `domain` 의 리포지토리 인터페이스에만 의존한다. 구현체는 `infrastructure` 에 두고 그 인터페이스를 `implements` 한다.
+- 이름: 도메인 리포지토리 `<X>Repository`(인터페이스) · 구현체 `<X>RepositoryImpl` · Spring Data `<X>JpaRepository`. Spring Data 는 `<리포지토리명>Impl` 클래스를 커스텀 구현(fragment)으로 자동 연결하므로 Spring Data 인터페이스를 `<X>Repository` 로 이름 짓지 않는다.
 - `interfaces` · `application` · `domain` 파일에 `com.example.infrastructure` import 가 없어야 한다. `domain` 파일에 `org.springframework.data` import 가 없어야 한다.
 - `interfaces` 는 `application` 의 서비스만 주입받는다. 리포지토리를 주입받거나 SQL 문자열을 두지 않는다.
 - 다른 도메인의 데이터는 `application.<그 도메인>` 의 서비스를 통해 읽는다. 다른 도메인의 리포지토리를 주입받지 않는다.
 - 엔티티를 컨트롤러 반환 타입으로 쓰지 않는다. 응답은 record DTO 다.
-- 기존 `com.example.item` · `com.example.assignment` 는 아직 4계층이 아니다(위반 상태). 기존 도메인 코드를 고치는 작업에는 그 도메인의 파일을 네 계층 패키지 아래 `<도메인>/` 으로 옮기는 일이 포함된다. 옮기기 전에 이동 · 신규 파일 목록을 답변에 먼저 보여 주고 승인받는다.
+- item · assignment 도메인은 4계층 이관을 마쳤다. 4계층이 아닌 도메인 코드를 고치는 작업에는 그 도메인의 파일을 네 계층 패키지 아래 `<도메인>/` 으로 옮기는 일이 포함된다. 옮기기 전에 이동 · 신규 파일 목록을 답변에 먼저 보여 주고 승인받는다.
 
 ### modern/api — 예외 · 로깅
 - 예외를 삼키지 않는다. 빈 `catch` 블록, 그리고 로그만 남기고 다시 던지지 않는 `catch` 블록이 없어야 한다. 잡으면 도메인 예외로 바꿔 던진다(원인 예외를 생성자에 넘긴다).
@@ -91,16 +92,22 @@ com/example/
 
 ## 4. 아키텍처 안내
 
-### modern/api (포트 8080) — 현재 구조 (4계층 이관 전)
+### modern/api (포트 8080) — 현재 구조 (item · assignment 모두 4계층 이관 완료)
 ```
 com/example/
-├── item/         문항 · 단원 · 태그 (ItemController, UnitController, *Service, *Repository, Item, Unit, Tag)
-├── assignment/   과제 배포 · 재배포 · 학급 리포트 (Distribution*, Report*, Submission*, ClassRoom*)
-├── common/       GlobalExceptionHandler, NotFoundException, ErrorResponse, ClockConfig, RootController
-└── config/       WebConfig — /api/** 에 http://localhost:5173 의 GET 만 CORS 허용
+├── interfaces/item/            ItemController, UnitController, ItemSearchController, *Response · ItemSearchRow · ItemSearchParams
+├── interfaces/assignment/      DistributionController, ReportController, DistributionResponse · ClassReportResponse · RedistributeRequest
+├── application/item/           ItemService, UnitService, ItemSearchService, ItemDetail · UnitSummary · ItemSearch{Command,Result}
+├── application/assignment/     DistributionService, ReportService, DistributionDetail · ClassReport
+├── domain/item/                Item, Unit, Tag, ItemStatus, *Repository(인터페이스), ItemSearchCondition · ItemSortOrder · PhpStrings
+├── domain/assignment/          Assignment, ClassRoom, Distribution, Submission, *Repository(인터페이스)
+├── infrastructure/item/        *JpaRepository(Spring Data), *RepositoryImpl(도메인 리포지토리 구현, 검색 JPQL)
+├── infrastructure/assignment/  *JpaRepository(Spring Data), *RepositoryImpl(도메인 리포지토리 구현)
+├── common/                     GlobalExceptionHandler, NotFoundException, ErrorResponse, ClockConfig, RootController
+└── config/                     WebConfig — /api/** 에 http://localhost:5173 의 GET 만 CORS 허용
 ```
 
-- 현재 엔드포인트: `GET /`, `GET /api/units`, `GET /api/units/{code}/items`, `GET /api/items/{id}`, `GET /api/distributions/{id}`, `POST /api/distributions/{id}/redistribute`, `GET /api/classes/{id}/report`. 새 엔드포인트는 `/api/<도메인 복수형>` 아래에 둔다.
+- 현재 엔드포인트: `GET /`, `GET /api/units`, `GET /api/units/{code}/items`, `GET /api/items/{id}`, `GET /api/items/search`(레거시 `search.php` 이관), `GET /api/distributions/{id}`, `POST /api/distributions/{id}/redistribute`, `GET /api/classes/{id}/report`. 새 엔드포인트는 `/api/<도메인 복수형>` 아래에 둔다.
 - 공개 문항은 `status = 'A'`(`ItemStatus.ACTIVE`)로 판단한다. 삭제 플래그가 아니라 상태 코드다.
 - 기본 프로필은 로컬 MariaDB(`itembank`), 테스트 프로필은 H2(MariaDB 모드, `ddl-auto: create-drop`).
 - Hikari 풀은 운영 값과 같게 작다(최대 5, 대기 3초). 트랜잭션을 오래 쥐는 코드는 곧바로 풀 고갈로 이어진다.
