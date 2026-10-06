@@ -2,6 +2,8 @@ package com.example.application.assignment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.common.NotFoundException;
@@ -55,10 +57,9 @@ class ReportServiceTest {
 
         when(classRoomRepository.findById(1)).thenReturn(Optional.of(classRoom));
         when(distributionRepository.findByClassRoomIdOrderByDistributedAtAsc(1)).thenReturn(List.of(d1, d2));
-        when(submissionRepository.findByDistributionIdOrderByStudentIdAsc(1)).thenReturn(List.of(
+        when(submissionRepository.findByDistributionIds(List.of(1, 2))).thenReturn(List.of(
             new Submission(d1, "STU-1001", SEED_TIME, new BigDecimal("80.0")),
-            new Submission(d1, "STU-1002", SEED_TIME, new BigDecimal("95.5"))));
-        when(submissionRepository.findByDistributionIdOrderByStudentIdAsc(2)).thenReturn(List.of(
+            new Submission(d1, "STU-1002", SEED_TIME, new BigDecimal("95.5")),
             new Submission(d2, "STU-1003", null, null)));
 
         ClassReport report = reportService.buildClassReport(1);
@@ -68,6 +69,44 @@ class ReportServiceTest {
         assertThat(report.submissionCount()).isEqualTo(3);
         assertThat(report.averageScore()).isEqualByComparingTo("87.8");
         assertThat(report.signature()).hasSize(64).isEqualTo(ReportService.sign("1|STU-1001|STU-1002|STU-1003"));
+        verify(submissionRepository, times(1)).findByDistributionIds(List.of(1, 2));
+    }
+
+    @Test
+    @DisplayName("buildClassReport: 서명 입력은 배포 시각 순서를 따른다 — 제출 조회 결과가 배포 id 순이어도")
+    void signaturePayloadFollowsDistributionOrder() {
+        ClassRoom classRoom = new ClassRoom(1, "5학년 1반", "TCH-01");
+        Unit unit = new Unit(1, "M5-1", "분수의 덧셈과 뺄셈", 5);
+        Assignment assignment = new Assignment(10, "분수 덧셈 연습", unit, SEED_TIME.plusDays(14), "O");
+        Distribution later = distribution(1, assignment, classRoom);
+        Distribution earlier = distribution(2, assignment, classRoom);
+
+        when(classRoomRepository.findById(1)).thenReturn(Optional.of(classRoom));
+        when(distributionRepository.findByClassRoomIdOrderByDistributedAtAsc(1)).thenReturn(List.of(earlier, later));
+        when(submissionRepository.findByDistributionIds(List.of(2, 1))).thenReturn(List.of(
+            new Submission(later, "STU-1001", SEED_TIME, null),
+            new Submission(earlier, "STU-1002", SEED_TIME, null)));
+
+        ClassReport report = reportService.buildClassReport(1);
+
+        assertThat(report.signature()).isEqualTo(ReportService.sign("1|STU-1002|STU-1001"));
+        assertThat(report.averageScore()).isNull();
+    }
+
+    @Test
+    @DisplayName("buildClassReport: 배포가 없으면 과제 · 제출 0건, 평균 null")
+    void buildsEmptyReportWhenNoDistributions() {
+        ClassRoom classRoom = new ClassRoom(1, "5학년 1반", "TCH-01");
+        when(classRoomRepository.findById(1)).thenReturn(Optional.of(classRoom));
+        when(distributionRepository.findByClassRoomIdOrderByDistributedAtAsc(1)).thenReturn(List.of());
+        when(submissionRepository.findByDistributionIds(List.of())).thenReturn(List.of());
+
+        ClassReport report = reportService.buildClassReport(1);
+
+        assertThat(report.assignmentCount()).isZero();
+        assertThat(report.submissionCount()).isZero();
+        assertThat(report.averageScore()).isNull();
+        assertThat(report.signature()).isEqualTo(ReportService.sign("1"));
     }
 
     @Test

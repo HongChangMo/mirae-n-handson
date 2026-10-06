@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import com.example.common.NotFoundException;
 import com.example.domain.assignment.Assignment;
+import com.example.domain.assignment.AssignmentClosedException;
 import com.example.domain.assignment.ClassRoom;
 import com.example.domain.assignment.Distribution;
 import com.example.domain.assignment.DistributionRepository;
@@ -63,13 +64,13 @@ class DistributionServiceTest {
     }
 
     @Test
-    @DisplayName("redistribute: 마감된 과제는 IllegalStateException(409)")
+    @DisplayName("redistribute: 마감된 과제는 AssignmentClosedException(409)")
     void redistributeRejectsClosedAssignment() {
         Distribution distribution = distribution(6, DistributionService.ASSIGNMENT_CLOSED);
         when(distributionRepository.findWithDetailsById(6)).thenReturn(Optional.of(distribution));
 
         assertThatThrownBy(() -> service().redistribute(6, null))
-            .isInstanceOf(IllegalStateException.class);
+            .isInstanceOf(AssignmentClosedException.class);
         assertThat(distribution.isRedistributed()).isFalse();
         assertThat(distribution.getDistributedAt()).isEqualTo(SEED_TIME);
     }

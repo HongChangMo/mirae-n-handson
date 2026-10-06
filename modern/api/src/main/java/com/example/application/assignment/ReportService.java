@@ -14,10 +14,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /** 학급 리포트 생성. */
 @Service
@@ -43,21 +44,26 @@ public class ReportService {
 
     /**
      * 학급 리포트를 만든다: 배포 · 제출을 읽어 집계한 뒤 외부 집계 시스템 형식의 서명을 붙인다.
+     *
+     * <p>트랜잭션을 걸지 않는다. 조회는 저장소 호출마다 짧은 읽기 트랜잭션으로 끝나고(쿼리 3개, 배포 수와 무관),
+     * 오래 걸리는 서명 계산은 커넥션을 쥐지 않은 채로 돈다.
      */
-    @Transactional
     public ClassReport buildClassReport(Integer classId) {
         ClassRoom classRoom = classRoomRepository.findById(classId)
             .orElseThrow(() -> new NotFoundException("학급이 없습니다: id=" + classId));
 
         List<Distribution> distributions = distributionRepository.findByClassRoomIdOrderByDistributedAtAsc(classId);
+        Map<Integer, List<Submission>> submissionsByDistribution = submissionRepository
+            .findByDistributionIds(distributions.stream().map(Distribution::getId).toList())
+            .stream()
+            .collect(Collectors.groupingBy(submission -> submission.getDistribution().getId()));
 
         int submissionCount = 0;
         BigDecimal scoreSum = BigDecimal.ZERO;
         int scoredCount = 0;
         StringBuilder payload = new StringBuilder(classRoom.getId().toString());
         for (Distribution distribution : distributions) {
-            List<Submission> submissions =
-                submissionRepository.findByDistributionIdOrderByStudentIdAsc(distribution.getId());
+            List<Submission> submissions = submissionsByDistribution.getOrDefault(distribution.getId(), List.of());
             submissionCount += submissions.size();
             for (Submission submission : submissions) {
                 payload.append('|').append(submission.getStudentId());
@@ -72,8 +78,7 @@ public class ReportService {
             ? null
             : scoreSum.divide(BigDecimal.valueOf(scoredCount), 1, RoundingMode.HALF_UP);
 
-        // TODO: 트랜잭션 밖으로 — 외부 집계 시스템 호출을 흉내내는 긴 루프.
-        //       DB 작업은 위에서 끝났는데 커넥션(트랜잭션)을 쥔 채로 돈다.
+        // 외부 집계 시스템 호출을 흉내내는 긴 루프 — 트랜잭션 밖이라 커넥션을 쥐지 않는다.
         String signature = sign(payload.toString());
 
         log.info("built class report for class {}: {} distributions, {} submissions",

@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.application.assignment.DistributionDetail;
 import com.example.application.assignment.DistributionService;
 import com.example.common.NotFoundException;
+import com.example.domain.assignment.AssignmentClosedException;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -76,5 +77,27 @@ class DistributionControllerTest {
             .andExpect(jsonPath("$.history.length()").value(2))
             .andExpect(jsonPath("$.history[0].id").value(4))
             .andExpect(jsonPath("$.history[1].id").value(5));
+    }
+
+    @Test
+    @DisplayName("POST /api/distributions/{id}/redistribute 마감된 과제 → 409, 공통 오류 응답")
+    void redistributeClosedAssignmentReturns409() throws Exception {
+        when(distributionService.redistribute(6, null))
+            .thenThrow(new AssignmentClosedException("마감된 과제는 재배포할 수 없습니다: distributionId=6"));
+
+        mockMvc.perform(post("/api/distributions/6/redistribute"))
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.status").value(409))
+            .andExpect(jsonPath("$.message").value("마감된 과제는 재배포할 수 없습니다: distributionId=6"));
+    }
+
+    @Test
+    @DisplayName("도메인 예외가 아닌 IllegalStateException → 409 가 아니라 500, 내부 메시지를 노출하지 않는다")
+    void unexpectedIllegalStateReturns500() throws Exception {
+        when(distributionService.getDistribution(7)).thenThrow(new IllegalStateException("내부 상태 오류"));
+
+        mockMvc.perform(get("/api/distributions/7"))
+            .andExpect(status().isInternalServerError())
+            .andExpect(jsonPath("$.message").value("서버 내부 오류"));
     }
 }

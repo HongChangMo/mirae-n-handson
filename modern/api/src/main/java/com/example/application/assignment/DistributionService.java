@@ -1,6 +1,7 @@
 package com.example.application.assignment;
 
 import com.example.common.NotFoundException;
+import com.example.domain.assignment.AssignmentClosedException;
 import com.example.domain.assignment.Distribution;
 import com.example.domain.assignment.DistributionRepository;
 import java.time.Clock;
@@ -52,7 +53,7 @@ public class DistributionService {
     public DistributionDetail redistribute(Integer id, String reason) {
         Distribution distribution = loadOrThrow(id);
         if (ASSIGNMENT_CLOSED.equals(distribution.getAssignment().getStatus())) {
-            throw new IllegalStateException("마감된 과제는 재배포할 수 없습니다: distributionId=" + id);
+            throw new AssignmentClosedException("마감된 과제는 재배포할 수 없습니다: distributionId=" + id);
         }
         distribution.markRedistributed(LocalDateTime.now(clock));
         log.info("redistributed distribution {} (assignment {}, class {}) reason={}",

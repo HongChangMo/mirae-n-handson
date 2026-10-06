@@ -55,7 +55,7 @@ com/example/
 ### modern/api — 예외 · 로깅
 - 예외를 삼키지 않는다. 빈 `catch` 블록, 그리고 로그만 남기고 다시 던지지 않는 `catch` 블록이 없어야 한다. 잡으면 도메인 예외로 바꿔 던진다(원인 예외를 생성자에 넘긴다).
 - 예외 → HTTP 응답 변환은 `common/GlobalExceptionHandler` 에서만 한다. 컨트롤러 메서드에 `try`/`catch` 가 없어야 한다.
-- 없는 리소스 404, 검증 실패 400, 그 밖의 예외 500.
+- 없는 리소스 404, 검증 실패 400, 상태 충돌 409(`common.ConflictException` 을 상속한 도메인 예외, 예: `AssignmentClosedException`), 그 밖의 예외 500. `IllegalStateException` 같은 범용 예외를 409 로 매핑하지 않는다.
 - 로그는 SLF4J(`org.slf4j.Logger`)로만 남긴다. `System.out` · `System.err` · `printStackTrace()` 가 없어야 한다.
 - 로그 인자에 학생 식별자(`STU-…`) · 이메일 · 토큰 값을 넣지 않는다.
 

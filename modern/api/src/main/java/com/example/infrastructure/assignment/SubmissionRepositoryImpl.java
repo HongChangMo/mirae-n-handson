@@ -2,6 +2,7 @@ package com.example.infrastructure.assignment;
 
 import com.example.domain.assignment.Submission;
 import com.example.domain.assignment.SubmissionRepository;
+import java.util.Collection;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 
@@ -16,7 +17,10 @@ public class SubmissionRepositoryImpl implements SubmissionRepository {
     }
 
     @Override
-    public List<Submission> findByDistributionIdOrderByStudentIdAsc(Integer distributionId) {
-        return submissionJpaRepository.findByDistributionIdOrderByStudentIdAsc(distributionId);
+    public List<Submission> findByDistributionIds(Collection<Integer> distributionIds) {
+        if (distributionIds.isEmpty()) {
+            return List.of();
+        }
+        return submissionJpaRepository.findByDistributionIdInOrderByDistributionIdAscStudentIdAsc(distributionIds);
     }
 }
