@@ -24,12 +24,12 @@ import org.springframework.stereotype.Repository;
  * 레거시는 뷰 {@code v_item_public} 을 썼다. 뷰의 조건(공개 상태, 단원 INNER JOIN, 태그 id 순)을 여기 JPQL 로 옮겼다.
  */
 @Repository
-public class ItemRepositoryAdapter implements ItemRepository {
+public class ItemRepositoryImpl implements ItemRepository {
 
     private final ItemJpaRepository itemJpaRepository;
     private final EntityManager entityManager;
 
-    public ItemRepositoryAdapter(ItemJpaRepository itemJpaRepository, EntityManager entityManager) {
+    public ItemRepositoryImpl(ItemJpaRepository itemJpaRepository, EntityManager entityManager) {
         this.itemJpaRepository = itemJpaRepository;
         this.entityManager = entityManager;
     }

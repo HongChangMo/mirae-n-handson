@@ -8,11 +8,11 @@ import org.springframework.stereotype.Repository;
 
 /** {@link UnitRepository} 구현 — Spring Data 저장소에 넘긴다. */
 @Repository
-public class UnitRepositoryAdapter implements UnitRepository {
+public class UnitRepositoryImpl implements UnitRepository {
 
     private final UnitJpaRepository unitJpaRepository;
 
-    public UnitRepositoryAdapter(UnitJpaRepository unitJpaRepository) {
+    public UnitRepositoryImpl(UnitJpaRepository unitJpaRepository) {
         this.unitJpaRepository = unitJpaRepository;
     }
 

@@ -1,10 +1,14 @@
-package com.example.assignment;
+package com.example.application.assignment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 import com.example.common.NotFoundException;
+import com.example.domain.assignment.Assignment;
+import com.example.domain.assignment.ClassRoom;
+import com.example.domain.assignment.Distribution;
+import com.example.domain.assignment.DistributionRepository;
 import com.example.domain.item.Unit;
 import java.time.Clock;
 import java.time.Instant;
@@ -50,7 +54,7 @@ class DistributionServiceTest {
         Distribution distribution = distribution(5, "O");
         when(distributionRepository.findWithDetailsById(5)).thenReturn(Optional.of(distribution));
 
-        DistributionResponse response = service().redistribute(5, "출제 오류 수정");
+        DistributionDetail response = service().redistribute(5, "출제 오류 수정");
 
         assertThat(response.redistributed()).isTrue();
         assertThat(response.distributedAt()).isEqualTo(NOW);

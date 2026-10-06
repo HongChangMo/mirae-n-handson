@@ -21,18 +21,18 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
-/** 저장소 어댑터 — 검색 JPQL 을 H2(MariaDB 모드)에 실제로 날린다. */
+/** 저장소 구현 — 검색 JPQL 을 H2(MariaDB 모드)에 실제로 날린다. */
 @DataJpaTest(showSql = false)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
-@Import(ItemRepositoryAdapter.class)
-class ItemRepositoryAdapterTest {
+@Import(ItemRepositoryImpl.class)
+class ItemRepositoryImplTest {
 
     @Autowired
     private TestEntityManager entityManager;
 
     @Autowired
-    private ItemRepositoryAdapter adapter;
+    private ItemRepositoryImpl repository;
 
     private Unit fraction;
     private Unit ratio;
@@ -58,7 +58,7 @@ class ItemRepositoryAdapterTest {
         String page) {
         entityManager.flush();
         entityManager.clear();
-        return adapter.search(ItemSearchCondition.of(q, unit, level, tag, sort, dir, page));
+        return repository.search(ItemSearchCondition.of(q, unit, level, tag, sort, dir, page));
     }
 
     private static List<Integer> ids(ItemSearchPage page) {
@@ -192,9 +192,9 @@ class ItemRepositoryAdapterTest {
         entityManager.flush();
         entityManager.clear();
 
-        assertThat(adapter.findWithDetailsById(id)).get().extracting(Item::getTitle).isEqualTo("위임 확인");
-        assertThat(adapter.findByUnitCodeAndStatus("M5-1", ItemStatus.ACTIVE)).extracting(Item::getId)
+        assertThat(repository.findWithDetailsById(id)).get().extracting(Item::getTitle).isEqualTo("위임 확인");
+        assertThat(repository.findByUnitCodeAndStatus("M5-1", ItemStatus.ACTIVE)).extracting(Item::getId)
             .containsExactly(id);
-        assertThat(adapter.countByUnitIdAndStatus(fraction.getId(), ItemStatus.ACTIVE)).isEqualTo(1);
+        assertThat(repository.countByUnitIdAndStatus(fraction.getId(), ItemStatus.ACTIVE)).isEqualTo(1);
     }
 }

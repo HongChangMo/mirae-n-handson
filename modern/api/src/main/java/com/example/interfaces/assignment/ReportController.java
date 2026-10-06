@@ -1,5 +1,6 @@
-package com.example.assignment;
+package com.example.interfaces.assignment;
 
+import com.example.application.assignment.ReportService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,7 +19,7 @@ public class ReportController {
 
     /** {@code GET /api/classes/{id}/report} — 학급 리포트. */
     @GetMapping("/{id}/report")
-    public ClassReport classReport(@PathVariable Integer id) {
-        return reportService.buildClassReport(id);
+    public ClassReportResponse classReport(@PathVariable Integer id) {
+        return ClassReportResponse.from(reportService.buildClassReport(id));
     }
 }

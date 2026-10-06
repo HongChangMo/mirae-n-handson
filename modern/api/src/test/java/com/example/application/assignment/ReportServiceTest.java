@@ -1,10 +1,17 @@
-package com.example.assignment;
+package com.example.application.assignment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 import com.example.common.NotFoundException;
+import com.example.domain.assignment.Assignment;
+import com.example.domain.assignment.ClassRoom;
+import com.example.domain.assignment.ClassRoomRepository;
+import com.example.domain.assignment.Distribution;
+import com.example.domain.assignment.DistributionRepository;
+import com.example.domain.assignment.Submission;
+import com.example.domain.assignment.SubmissionRepository;
 import com.example.domain.item.Unit;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

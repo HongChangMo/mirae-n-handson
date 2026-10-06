@@ -1,5 +1,6 @@
-package com.example.assignment;
+package com.example.interfaces.assignment;
 
+import com.example.application.assignment.DistributionService;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +24,7 @@ public class DistributionController {
     /** {@code GET /api/distributions/{id}} — 배포 단건. */
     @GetMapping("/{id}")
     public DistributionResponse getDistribution(@PathVariable Integer id) {
-        return distributionService.getDistribution(id);
+        return DistributionResponse.from(distributionService.getDistribution(id));
     }
 
     /**
@@ -35,9 +36,11 @@ public class DistributionController {
             @PathVariable Integer id,
             @RequestBody(required = false) @Valid RedistributeRequest request) {
         String reason = request == null ? null : request.reason();
-        DistributionResponse redistributed = distributionService.redistribute(id, reason);
+        DistributionResponse redistributed = DistributionResponse.from(distributionService.redistribute(id, reason));
         // v1.4.2 — 재배포 응답에 학급 배포 이력(history)을 함께 돌려주도록 변경. 이전 버전은 재배포 건만 반환했다.
-        List<DistributionResponse> history = distributionService.listByClass(redistributed.classId());
+        List<DistributionResponse> history = distributionService.listByClass(redistributed.classId()).stream()
+            .map(DistributionResponse::from)
+            .toList();
         return new RedistributeResponse(redistributed, history);
     }
 

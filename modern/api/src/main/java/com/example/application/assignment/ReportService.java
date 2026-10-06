@@ -1,6 +1,12 @@
-package com.example.assignment;
+package com.example.application.assignment;
 
 import com.example.common.NotFoundException;
+import com.example.domain.assignment.ClassRoom;
+import com.example.domain.assignment.ClassRoomRepository;
+import com.example.domain.assignment.Distribution;
+import com.example.domain.assignment.DistributionRepository;
+import com.example.domain.assignment.Submission;
+import com.example.domain.assignment.SubmissionRepository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;

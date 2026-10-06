@@ -1,6 +1,8 @@
-package com.example.assignment;
+package com.example.application.assignment;
 
 import com.example.common.NotFoundException;
+import com.example.domain.assignment.Distribution;
+import com.example.domain.assignment.DistributionRepository;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,15 +30,15 @@ public class DistributionService {
 
     /** 배포 단건. */
     @Transactional(readOnly = true)
-    public DistributionResponse getDistribution(Integer id) {
-        return DistributionResponse.from(loadOrThrow(id));
+    public DistributionDetail getDistribution(Integer id) {
+        return DistributionDetail.from(loadOrThrow(id));
     }
 
     /** 학급의 배포 이력(배포 시각 순). */
     @Transactional(readOnly = true)
-    public List<DistributionResponse> listByClass(Integer classId) {
+    public List<DistributionDetail> listByClass(Integer classId) {
         return distributionRepository.findByClassRoomIdOrderByDistributedAtAsc(classId).stream()
-            .map(DistributionResponse::from)
+            .map(DistributionDetail::from)
             .toList();
     }
 
@@ -47,7 +49,7 @@ public class DistributionService {
      * @param reason 사유(없어도 됨) — 로그에만 남긴다
      */
     @Transactional
-    public DistributionResponse redistribute(Integer id, String reason) {
+    public DistributionDetail redistribute(Integer id, String reason) {
         Distribution distribution = loadOrThrow(id);
         if (ASSIGNMENT_CLOSED.equals(distribution.getAssignment().getStatus())) {
             throw new IllegalStateException("마감된 과제는 재배포할 수 없습니다: distributionId=" + id);
@@ -58,7 +60,7 @@ public class DistributionService {
             distribution.getAssignment().getId(),
             distribution.getClassRoom().getId(),
             reason);
-        return DistributionResponse.from(distribution);
+        return DistributionDetail.from(distribution);
     }
 
     private Distribution loadOrThrow(Integer id) {

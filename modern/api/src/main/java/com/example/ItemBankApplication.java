@@ -10,7 +10,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * <ul>
  *   <li>{@code com.example.<계층>.item} — 단원 · 문항 · 태그 (문항 은행 도메인, 4계층:
  *       interfaces · application · domain · infrastructure)</li>
- *   <li>{@code com.example.assignment} — 학급 · 과제 · 배포 · 제출 (과제 배포 도메인, 최소 골격)</li>
+ *   <li>{@code com.example.<계층>.assignment} — 학급 · 과제 · 배포 · 제출 (과제 배포 도메인, 4계층:
+ *       interfaces · application · domain · infrastructure)</li>
  *   <li>{@code com.example.common} — 공통 예외 처리 · 루트 엔드포인트 · 시각 주입</li>
  *   <li>{@code com.example.config} — 웹 MVC 설정(CORS)</li>
  * </ul>

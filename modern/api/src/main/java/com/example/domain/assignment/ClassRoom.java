@@ -1,4 +1,4 @@
-package com.example.assignment;
+package com.example.domain.assignment;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

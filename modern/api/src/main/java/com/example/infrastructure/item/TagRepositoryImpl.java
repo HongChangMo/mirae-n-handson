@@ -7,11 +7,11 @@ import org.springframework.stereotype.Repository;
 
 /** {@link TagRepository} 구현 — Spring Data 저장소에 넘긴다. */
 @Repository
-public class TagRepositoryAdapter implements TagRepository {
+public class TagRepositoryImpl implements TagRepository {
 
     private final TagJpaRepository tagJpaRepository;
 
-    public TagRepositoryAdapter(TagJpaRepository tagJpaRepository) {
+    public TagRepositoryImpl(TagJpaRepository tagJpaRepository) {
         this.tagJpaRepository = tagJpaRepository;
     }
 
