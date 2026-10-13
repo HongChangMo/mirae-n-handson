@@ -44,8 +44,8 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.BAD_REQUEST, "요청 값이 올바르지 않습니다", request);
     }
 
-    @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<ErrorResponse> handleConflict(IllegalStateException ex, HttpServletRequest request) {
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ErrorResponse> handleConflict(ConflictException ex, HttpServletRequest request) {
         log.warn("state conflict: {} ({})", ex.getMessage(), request.getRequestURI());
         return build(HttpStatus.CONFLICT, ex.getMessage(), request);
     }
