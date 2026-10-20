@@ -95,7 +95,8 @@ public class ItemRepositoryImpl implements ItemRepository {
             params.put("keyword", "%" + condition.keyword() + "%");
         }
         if (condition.unitCode() != null) {
-            jpql.append(" and u.code = '").append(condition.unitCode()).append("'");
+            jpql.append(" and u.code = :unitCode");
+            params.put("unitCode", condition.unitCode());
         }
         LevelFilter level = condition.level();
         if (level.isBelowMax()) {
