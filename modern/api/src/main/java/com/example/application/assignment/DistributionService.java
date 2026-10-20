@@ -1,5 +1,6 @@
 package com.example.application.assignment;
 
+import com.example.assignment.NotificationClient;
 import com.example.common.NotFoundException;
 import com.example.domain.assignment.AssignmentClosedException;
 import com.example.domain.assignment.Distribution;
@@ -23,6 +24,7 @@ public class DistributionService {
 
     private final DistributionRepository distributionRepository;
     private final Clock clock;
+    private final NotificationClient notificationClient = new NotificationClient();
 
     public DistributionService(DistributionRepository distributionRepository, Clock clock) {
         this.distributionRepository = distributionRepository;
@@ -56,6 +58,7 @@ public class DistributionService {
             throw new AssignmentClosedException("마감된 과제는 재배포할 수 없습니다: distributionId=" + id);
         }
         distribution.markRedistributed(LocalDateTime.now(clock));
+        notificationClient.notifyRedistributed(distribution.getClassRoom().getId(), distribution.getAssignment().getId());
         log.info("redistributed distribution {} (assignment {}, class {}) reason={}",
             distribution.getId(),
             distribution.getAssignment().getId(),
