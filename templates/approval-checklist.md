@@ -42,6 +42,8 @@ AI 가 만든 변경분 · 외주사 PR 을 머지하기 전에 리뷰어가 대
 
 ### A. 비밀값 · SQL · DB 접속
 - [ ] 비밀번호 · 토큰 · 키 리터럴이 코드 · 설정 · 테스트 픽스처에 0건인가? (실습용 더미 `app-pass` 는 제외)
+- [ ] `src/main/resources` 의 yml · properties 와 Dockerfile 의 `ENV` · `ARG` · `COPY` 로 jar · 이미지에 들어가는 비밀번호 · 토큰 · 키가 0건인가? (실행 시점 환경 변수 · 시크릿 저장소 주입은 해당 없음)
+- [ ] 외부 API 키를 URL 쿼리 파라미터로 보내는 곳이 0건이고, HTTP 클라이언트의 요청 원문 로그(RestClient · WebClient `DEBUG`, Apache HttpClient `wire`)를 켜는 설정이 0건인가?
 - [ ] SQL · JPQL 문자열에 `+` · `String.format` · `concat` 으로 메서드 파라미터나 요청 값을 붙이는 곳이 0건인가? (enum 상수 같은 코드 안 고정 문자열은 해당 없음)
 - [ ] 운영 DB 호스트(`prod-db` 등)에 접속하는 명령 · 설정이 0건인가?
 - [ ] 테스트가 실제 MariaDB 에 접속하는 설정이 0건인가? (테스트 설정은 `src/test/resources/application-test.yml`)
@@ -53,10 +55,14 @@ AI 가 만든 변경분 · 외주사 PR 을 머지하기 전에 리뷰어가 대
 
 ### C. 개인정보 로그
 - [ ] 로그 인자에 학생 식별자(`STU-…`) · 이메일 · 토큰 값이 0건인가?
+- [ ] 응답 DTO · 오류 응답(`ErrorResponse`) 메시지에 학생 식별자 · 이메일 · 토큰 값이 0건인가?
 
 ### D. 트랜잭션 풀 고갈
 - [ ] `@Transactional` 메서드 안(그 메서드가 호출하는 메서드 포함)에서 외부 HTTP 호출이 0건인가?
 - [ ] `@Transactional` 메서드 안에서, 컬렉션을 도는 `for` · `forEach` · `stream` 루프 안에서 리포지토리 메서드를 호출하는 곳이 0건인가?
+
+### E. 외부 입력
+- [ ] 새 엔드포인트 · 바뀐 엔드포인트의 경로 변수 · 쿼리 파라미터 · 요청 바디가 서버에서 검증되는가? (Bean Validation `@Valid` · 제약 애너테이션, 또는 서비스의 범위 · 길이 · 허용 목록 확인)
 
 ## 3. 요청 범위 이탈 없음
 
